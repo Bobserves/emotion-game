@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess the Speaker’s Emotion Randomizer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #fff7ed 0, #f8fafc 45%, #e0f2fe 100%);
+      color: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(1100px, 100%);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 28px;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.14);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+
+    header {
+      padding: 32px 32px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 46px);
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 0 auto;
+      max-width: 680px;
+      color: #475569;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      padding: 20px 32px 28px;
+    }
+
+    .panel {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-weight: 800;
+      font-size: 17px;
+    }
+
+    .hint {
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 250px;
+      resize: vertical;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 16px;
+      line-height: 1.5;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    textarea:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.18);
+    }
+
+    .controls {
+      padding: 0 32px 34px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .primary {
+      background: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.22);
+    }
+
+    .secondary {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .result-card {
+      display: grid;
+      gap: 14px;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      border-radius: 26px;
+      padding: 26px;
+      min-height: 210px;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+    }
+
+    .result-title {
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #bae6fd;
+      font-weight: 900;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+    }
+
+    .result-box {
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .result-label {
+      margin-bottom: 8px;
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .result-text {
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.25;
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .emotion-text {
+      color: #fde68a;
+    }
+
+    .shake {
+      animation: pop 0.28s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.98); opacity: 0.65; }
+      65% { transform: scale(1.02); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .warning {
+      display: none;
+      text-align: center;
+      color: #b91c1c;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 12px;
+      }
+
+      header,
+      .content,
+      .controls {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .content,
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      textarea {
+        min-height: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Guess the Speaker’s Emotion 🎭</h1>
+      <p class="subtitle">
+        輸入句子和情緒，每行一個。按下按鈕後，系統會隨機配對一個句子與一個情緒，讓講者用指定情緒唸出句子，其他人猜情緒。
+      </p>
+    </header>
+
+    <section class="content">
+      <div class="panel">
+        <label for="sentences">
+          句子 Sentences
+          <span class="hint">每行一個</span>
+        </label>
+        <textarea id="sentences" spellcheck="false">I bought a sandwich.
+The meeting starts at seven.
+I forgot my umbrella.
+This is my favorite chair.
+I need to charge my phone.
+The elevator is very slow.
+I found a mysterious key.
+My coffee tastes different today.</textarea>
+      </div>
+
+      <div class="panel">
+        <label for="emotions">
+          情緒 Emotions
+          <span class="hint">每行一個</span>
+        </label>
+        <textarea id="emotions" spellcheck="false">secretly proud
+extremely jealous
+trying not to cry
+fake confident
+suspicious
+overly excited
+disappointed but polite
+terrified but pretending to be calm</textarea>
+      </div>
+    </section>
+
+    <section class="controls">
+      <div class="button-row">
+        <button class="primary" id="drawBtn">🎲 隨機組合</button>
+        <button class="secondary" id="copyBtn">📋 複製結果</button>
+      </div>
+
+      <div class="warning" id="warning">請至少輸入一個句子和一個情緒。</div>
+
+      <div class="result-card" id="resultCard">
+        <div class="result-title">Current Challenge</div>
+        <div class="result-grid">
+          <div class="result-box">
+            <div class="result-label">Sentence</div>
+            <div class="result-text" id="sentenceResult">Press the button to draw.</div>
+          </div>
+          <div class="result-box">
+            <div class="result-label">Emotion</div>
+            <div class="result-text emotion-text" id="emotionResult">Mystery mode</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        主持小技巧：講者看到情緒後先不要給觀眾看，唸完句子後讓大家舉手猜。<br />
+        想增加難度，可以要求講者重複同一句三次，每次情緒都更強烈。
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const sentencesInput = document.getElementById('sentences');
+    const emotionsInput = document.getElementById('emotions');
+    const drawBtn = document.getElementById('drawBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const sentenceResult = document.getElementById('sentenceResult');
+    const emotionResult = document.getElementById('emotionResult');
+    const resultCard = document.getElementById('resultCard');
+    const warning = document.getElementById('warning');
+
+    let currentSentence = '';
+    let currentEmotion = '';
+
+    function parseLines(value) {
+      return value
+        .split('\n')
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+
+    function randomItem(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function drawChallenge() {
+      const sentences = parseLines(sentencesInput.value);
+      const emotions = parseLines(emotionsInput.value);
+
+      if (sentences.length === 0 || emotions.length === 0) {
+        warning.style.display = 'block';
+        return;
+      }
+
+      warning.style.display = 'none';
+      currentSentence = randomItem(sentences);
+      currentEmotion = randomItem(emotions);
+
+      sentenceResult.textContent = currentSentence;
+      emotionResult.textContent = currentEmotion;
+
+      resultCard.classList.remove('shake');
+      void resultCard.offsetWidth;
+      resultCard.classList.add('shake');
+    }
+
+    async function copyResult() {
+      if (!currentSentence || !currentEmotion) {
+        drawChallenge();
+      }
+
+      const text = `Sentence: ${sentenceResult.textContent}\nEmotion: ${emotionResult.textContent}`;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = '✅ 已複製';
+        setTimeout(() => {
+          copyBtn.textContent = '📋 複製結果';
+        }, 1400);
+      } catch (error) {
+        alert(text);
+      }
+    }
+
+    drawBtn.addEventListener('click', drawChallenge);
+    copyBtn.addEventListener('click', copyResult);
+
+    document.addEventListener('keydown', event => {
+      if (event.code === 'Space' && !['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) {
+        event.preventDefault();
+        drawChallenge();
+      }
+    });
+  </script>
+</body>
+</html>
